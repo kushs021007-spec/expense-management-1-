@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Management - Login</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: #ffffff;
+            padding: 40px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .input-box:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .signup-btn:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <input type="email" class="input-box" placeholder="Enter Gmail" required>
+        <input type="password" class="input-box" placeholder="Enter Password" required>
+        <button onclick="goToSignup()" class="signup-btn">Sign Up</button>
+
+        <script>
+        function goToSignup() {
+        window.location.href = "cfo_signup.html";
+        }
+        </script>
+
+    </div>
+
+</body>
+</html>
