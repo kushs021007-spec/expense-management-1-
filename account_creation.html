@@ -46,7 +46,7 @@ input, select{
 }
 
 button{
-    padding:8px 14px;
+    padding:6px 12px;
     background:#4a90e2;
     color:white;
     border:none;
@@ -58,13 +58,8 @@ button:hover{
     background:#357abd;
 }
 
-.add-btn{
-    margin-top:20px;
-}
-
-.rules-btn{
-    margin-top:25px;
-    width:200px;
+.delete-btn{
+    background:red;
 }
 </style>
 </head>
@@ -83,47 +78,77 @@ button:hover{
     <th>Manager</th>
     <th>Gmail</th>
     <th>Password</th>
+    <th>Remove</th>
 </tr>
 </thead>
 
-<tbody id="userTable">
-<tr>
-    <td><input type="text" placeholder="Enter Name"></td>
-
-    <td>
-        <select onchange="updateManager(this)">
-            <option value="">Select</option>
-            <option value="manager">Manager</option>
-            <option value="employee">Employee</option>
-        </select>
-    </td>
-
-    <td><input type="text" class="manager-field" placeholder="Manager Name"></td>
-
-    <td><input type="email" placeholder="Enter Gmail"></td>
-
-    <td>
-        <button onclick="generatePassword()">Send</button>
-    </td>
-</tr>
-</tbody>
+<tbody id="userTable"></tbody>
 </table>
 
-<!-- Add User Button -->
-<div style="text-align:center;">
-    <button class="add-btn" onclick="addUser()">+ Add User</button>
+<div style="text-align:center; margin-top:20px;">
+    <button onclick="addUser()">+ Add User</button>
 </div>
 
-<!-- Set Rules Button -->
-<div style="text-align:center;">
-    <button class="rules-btn" onclick="openRules()">Set Rules</button>
+<div style="text-align:center; margin-top:20px;">
+    <button onclick="goToRules()">Set Rules</button>
 </div>
 
 </div>
 
 <script>
 
-// Update Manager Field
+// Load saved users when page opens
+window.onload = function(){
+    const savedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    savedUsers.forEach(user => createRow(user));
+}
+
+// Add New User
+function addUser(){
+    createRow();
+}
+
+// Create Row Function
+function createRow(userData = {}){
+
+    const table = document.getElementById("userTable");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input type="text" value="${userData.name || ""}" placeholder="Enter Name"></td>
+
+        <td>
+            <select onchange="updateManager(this)">
+                <option value="">Select</option>
+                <option value="manager" ${userData.role==="manager"?"selected":""}>Manager</option>
+                <option value="employee" ${userData.role==="employee"?"selected":""}>Employee</option>
+            </select>
+        </td>
+
+        <td><input type="text" class="manager-field"
+            value="${userData.manager || ""}"
+            placeholder="Manager Name"></td>
+
+        <td><input type="email"
+            value="${userData.gmail || ""}"
+            placeholder="Enter Gmail"></td>
+
+        <td><button onclick="generatePassword()">Send</button></td>
+
+        <td><button class="delete-btn" onclick="deleteRow(this)">🗑</button></td>
+    `;
+
+    table.appendChild(row);
+    saveAllUsers();
+}
+
+// Delete Row
+function deleteRow(btn){
+    btn.parentElement.parentElement.remove();
+    saveAllUsers();
+}
+
+// Auto Manager Disable
 function updateManager(selectElement){
     let row = selectElement.parentElement.parentElement;
     let managerField = row.querySelector(".manager-field");
@@ -135,9 +160,11 @@ function updateManager(selectElement){
         managerField.value = "";
         managerField.disabled = false;
     }
+
+    saveAllUsers();
 }
 
-// Generate Random Password
+// Generate Password
 function generatePassword(){
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let password = "";
@@ -145,66 +172,32 @@ function generatePassword(){
         password += chars.charAt(Math.floor(Math.random()*chars.length));
     }
 
-    alert("Auto Generated Password:\n" + password +
-    "\n\n(Email sending requires backend integration)");
+    alert("Generated Password:\n" + password);
 }
 
-// Add New User Row
-function addUser(){
-    const table = document.getElementById("userTable");
-
-    const newRow = document.createElement("tr");
-
-    newRow.innerHTML = `
-        <td><input type="text" placeholder="Enter Name"></td>
-
-        <td>
-            <select onchange="updateManager(this)">
-                <option value="">Select</option>
-                <option value="manager">Manager</option>
-                <option value="employee">Employee</option>
-            </select>
-        </td>
-
-        <td><input type="text" class="manager-field" placeholder="Manager Name"></td>
-
-        <td><input type="email" placeholder="Enter Gmail"></td>
-
-        <td>
-            <button onclick="generatePassword()">Send</button>
-        </td>
-    `;
-
-    table.appendChild(newRow);
-}
-function saveUsersToStorage() {
+// Save All Users to LocalStorage
+function saveAllUsers(){
 
     const rows = document.querySelectorAll("#userTable tr");
-
-    let employees = [];
-    let managers = [];
+    let users = [];
 
     rows.forEach(row => {
         const name = row.cells[0].querySelector("input").value;
         const role = row.cells[1].querySelector("select").value;
+        const manager = row.cells[2].querySelector("input").value;
+        const gmail = row.cells[3].querySelector("input").value;
 
         if(name && role){
-            if(role === "manager"){
-                managers.push(name);
-            } else if(role === "employee"){
-                employees.push(name);
-            }
+            users.push({name, role, manager, gmail});
         }
     });
 
-    localStorage.setItem("employees", JSON.stringify(employees));
-    localStorage.setItem("managers", JSON.stringify(managers));
+    localStorage.setItem("users", JSON.stringify(users));
 }
 
-
-// Open Rule Page
+// Redirect to Rules Page
 function goToRules(){
-    saveUsersToStorage();   // save names first
+    saveAllUsers();
     window.location.href = "rules.html";
 }
 
@@ -212,4 +205,3 @@ function goToRules(){
 
 </body>
 </html>
-
