@@ -2,96 +2,185 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>CFO Approval</title>
+<title>CFO Pending Approvals</title>
 
 <style>
-body{font-family:Arial;background:#eef2f7;padding:40px;}
-.container{background:white;padding:25px;border-radius:10px;
-max-width:800px;margin:auto;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-table{width:100%;border-collapse:collapse;margin-top:15px;}
-th,td{border:1px solid #ddd;padding:10px;text-align:center;}
-th{background:#4a90e2;color:white;}
-button{padding:6px 12px;margin:3px;border:none;
-background:#4a90e2;color:white;border-radius:4px;cursor:pointer;}
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f7;
+    padding:40px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    text-align:center;
+    color:#2c3e50;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#4a90e2;
+    color:white;
+}
+
+button{
+    padding:7px 12px;
+    margin:4px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+}
+
+.approve{ background:green; }
+.reject{ background:red; }
+.nav-btn{
+    background:#4a90e2;
+}
+
+.bottom-buttons{
+    margin-top:20px;
+    text-align:center;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
+
 <h2>CFO Pending Approvals</h2>
 
-<table id="billTable">
+<table>
 <thead>
 <tr>
-<th>Employee</th>
-<th>Amount</th>
-<th>Manager Status</th>
-<th>CFO Action</th>
+    <th>Employee</th>
+    <th>Amount</th>
+    <th>Status</th>
+    <th>Action</th>
 </tr>
 </thead>
-<tbody></tbody>
+
+<tbody id="approvalTable"></tbody>
 </table>
 
-<button onclick="goBack()">⬅ Back to Account Creation</button>
+<div class="bottom-buttons">
+    <button class="nav-btn" onclick="goBack()">⬅ Back to Account Creation</button>
+    <button class="nav-btn" onclick="openAnalysis()">📊 View Analysis</button>
+</div>
 
-
-<button onclick="openAnalysis()">View Analysis</button>
-
-<script>
-function openAnalysis(){
-    window.location.href = "analysis.html";
-}
-
-</script>
 </div>
 
 <script>
 
+// Bills stored from manager stage
 let bills = JSON.parse(localStorage.getItem("bills")) || [];
 
+// Load bills waiting for CFO
 function loadBills(){
 
-const tbody = document.querySelector("#billTable tbody");
-tbody.innerHTML="";
+    const table = document.getElementById("approvalTable");
+    table.innerHTML = "";
 
-bills
-.filter(b => b.managerApproved && !b.cfoDecision)
-.forEach((bill,index)=>{
+    bills
+    .filter(b => b.status === "manager_approved")
+    .forEach((bill,index)=>{
 
-let row = tbody.insertRow();
+        let row = table.insertRow();
 
-row.innerHTML = `
-<td>${bill.user}</td>
-<td>${bill.amount}</td>
-<td>Approved</td>
-<td>
-<button onclick="approve(${index})">Approve</button>
-<button onclick="reject(${index})">Reject</button>
-</td>
-`;
-});
+        row.insertCell(0).innerText = bill.user;
+        row.insertCell(1).innerText = bill.amount;
+        row.insertCell(2).innerText = "Waiting CFO Approval";
+
+        row.insertCell(3).innerHTML = `
+            <button class="approve" onclick="approve(${index})">
+                Approve
+            </button>
+            <button class="reject" onclick="reject(${index})">
+                Reject
+            </button>
+        `;
+    });
 }
 
+
+// CFO Approves
 function approve(i){
-bills[i].cfoDecision="approved";
-save();
+    bills[i].status = "approved";
+    updateAnalysis("approved");
+    saveBills();
 }
 
+
+// CFO Rejects
 function reject(i){
-bills[i].cfoDecision="rejected";
-save();
+    bills[i].status = "rejected";
+    updateAnalysis("rejected");
+    saveBills();
 }
 
-function save(){
-localStorage.setItem("bills",JSON.stringify(bills));
-loadBills();
+
+// Save bills
+function saveBills(){
+    localStorage.setItem("bills", JSON.stringify(bills));
+    loadBills();
 }
 
-loadBills();
+
+// Update analytics data
+function updateAnalysis(type){
+
+    let stats =
+    JSON.parse(localStorage.getItem("analysis")) || {
+        approved:0,
+        rejected:0,
+        bothApproved:0
+    };
+
+    if(type === "approved"){
+        stats.approved++;
+        stats.bothApproved++;
+    }else{
+        stats.rejected++;
+    }
+
+    localStorage.setItem("analysis", JSON.stringify(stats));
+}
+
+
+// Navigation buttons
 function goBack(){
     window.location.href = "account_creation.html";
 }
+
+function openAnalysis(){
+    window.location.href = "analysis.html";
+}
+
+
+// Initial load
+loadBills();
+
 </script>
+
 </body>
 </html>
