@@ -159,17 +159,15 @@ function handleSignup(event) {
 }
 </script>
 
-<button onclick="goToLogin()" 
-style="background:#2c3e50; margin-top:10px;">
-Login
-</button>
+<button onclick="signup()">Sign Up</button>
 
 <script>
-function goToLogin() {
-    window.location.href = "index.html";
+function signup(){
+    // later you will save data in database here
+    alert("Signup Successful ✅");
+    window.location.href = "account_creation.html";
 }
 </script>
-
 
 </body>
 </html>
