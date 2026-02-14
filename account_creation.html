@@ -2,13 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Account Creation - CFO</title>
+<title>CFO - Account Creation</title>
 
 <style>
 body{
     font-family: Arial, sans-serif;
     background:#eef2f7;
     padding:40px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
 }
 
 h2{
@@ -37,11 +42,11 @@ th{
 
 input, select{
     padding:6px;
-    width:90%;
+    width:95%;
 }
 
 button{
-    padding:6px 12px;
+    padding:8px 14px;
     background:#4a90e2;
     color:white;
     border:none;
@@ -53,22 +58,25 @@ button:hover{
     background:#357abd;
 }
 
-.rules-link{
-    display:block;
+.add-btn{
+    margin-top:20px;
+}
+
+.rules-btn{
     margin-top:25px;
-    text-align:center;
-    font-weight:bold;
-    color:#2c3e50;
-    text-decoration:none;
+    width:200px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>CFO - Create Accounts</h2>
+<div class="container">
+
+<h2>CFO - Create Users</h2>
 
 <table>
+<thead>
 <tr>
     <th>User Name</th>
     <th>Role</th>
@@ -76,7 +84,9 @@ button:hover{
     <th>Gmail</th>
     <th>Password</th>
 </tr>
+</thead>
 
+<tbody id="userTable">
 <tr>
     <td><input type="text" placeholder="Enter Name"></td>
 
@@ -88,7 +98,7 @@ button:hover{
         </select>
     </td>
 
-    <td><input type="text" placeholder="Manager Name" class="manager-field"></td>
+    <td><input type="text" class="manager-field" placeholder="Manager Name"></td>
 
     <td><input type="email" placeholder="Enter Gmail"></td>
 
@@ -96,11 +106,24 @@ button:hover{
         <button onclick="generatePassword()">Send</button>
     </td>
 </tr>
-
+</tbody>
 </table>
+
+<!-- Add User Button -->
+<div style="text-align:center;">
+    <button class="add-btn" onclick="addUser()">+ Add User</button>
+</div>
+
+<!-- Set Rules Button -->
+<div style="text-align:center;">
+    <button class="rules-btn" onclick="openRules()">Set Rules</button>
+</div>
+
+</div>
 
 <script>
 
+// Update Manager Field
 function updateManager(selectElement){
     let row = selectElement.parentElement.parentElement;
     let managerField = row.querySelector(".manager-field");
@@ -114,6 +137,7 @@ function updateManager(selectElement){
     }
 }
 
+// Generate Random Password
 function generatePassword(){
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let password = "";
@@ -121,21 +145,45 @@ function generatePassword(){
         password += chars.charAt(Math.floor(Math.random()*chars.length));
     }
 
-    alert("Auto Generated Password: " + password +
-    "\n(Email sending requires backend integration)");
+    alert("Auto Generated Password:\n" + password +
+    "\n\n(Email sending requires backend integration)");
 }
 
-</script>
+// Add New User Row
+function addUser(){
+    const table = document.getElementById("userTable");
 
-<button onclick="openRules()">Set Rules</button>
+    const newRow = document.createElement("tr");
 
-<script>
+    newRow.innerHTML = `
+        <td><input type="text" placeholder="Enter Name"></td>
+
+        <td>
+            <select onchange="updateManager(this)">
+                <option value="">Select</option>
+                <option value="manager">Manager</option>
+                <option value="employee">Employee</option>
+            </select>
+        </td>
+
+        <td><input type="text" class="manager-field" placeholder="Manager Name"></td>
+
+        <td><input type="email" placeholder="Enter Gmail"></td>
+
+        <td>
+            <button onclick="generatePassword()">Send</button>
+        </td>
+    `;
+
+    table.appendChild(newRow);
+}
+
+// Open Rule Page
 function openRules(){
     window.location.href = "rules.html";
 }
-</script>
 
+</script>
 
 </body>
 </html>
-
