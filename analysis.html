@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bill Analysis</title>
+
+<style>
+body{font-family:Arial;background:#eef2f7;padding:40px;}
+.container{background:white;padding:25px;border-radius:10px;
+max-width:600px;margin:auto;text-align:center;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.card{
+background:#4a90e2;
+color:white;
+margin:10px;
+padding:20px;
+border-radius:8px;
+font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Bill Analysis Dashboard</h2>
+
+<div class="card" id="managerApproved"></div>
+<div class="card" id="managerRejected"></div>
+<div class="card" id="finalApproved"></div>
+
+</div>
+
+<script>
+
+const bills = JSON.parse(localStorage.getItem("bills")) || [];
+
+let managerApproved =
+bills.filter(b=>b.managerApproved).length;
+
+let managerRejected =
+bills.filter(b=>b.managerDecision==="rejected").length;
+
+let finalApproved =
+bills.filter(b=>b.cfoDecision==="approved").length;
+
+document.getElementById("managerApproved")
+.innerText="Manager Approved Bills: "+managerApproved;
+
+document.getElementById("managerRejected")
+.innerText="Manager Rejected Bills: "+managerRejected;
+
+document.getElementById("finalApproved")
+.innerText="Approved by Manager + CFO: "+finalApproved;
+
+</script>
+</body>
+</html>
