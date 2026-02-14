@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFO Signup</title>
+
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #eef2f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    h2 { color: #2c3e50; margin-bottom: 20px; margin-top: 0; }
+
+    .input-group { text-align: left; margin-bottom: 15px; }
+    
+    label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #555;
+        margin-left: 2px;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        transition: border 0.3s;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    /* Read-only styling */
+    input:read-only {
+        background-color: #f8f9fa;
+        color: #666;
+        cursor: not-allowed;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        background: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+    button:hover { background: #357abd; }
+
+    .message {
+        font-size: 12px;
+        margin-top: 5px;
+        height: 15px;
+        font-weight: 500;
+    }
+    .text-success { color: #27ae60; }
+    .text-error { color: #e74c3c; }
+    .text-loading { color: #f39c12; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>CFO Signup</h2>
+    
+    <form onsubmit="handleSignup(event)">
+        <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="cfo@company.com" required>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <div class="input-group">
+            <label for="company">Company Name</label>
+            <input type="text" id="company" placeholder="Acme Corp" required>
+        </div>
+
+        <div class="input-group">
+            <label for="country">Headquarters Country</label>
+            <input type="text" id="country" placeholder="e.g. France"
+                   onblur="fetchCurrency()" required>
+            <div id="status-msg" class="message"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="currency">Local Currency</label>
+            <input type="text" id="currency" placeholder="Auto-detected..." readonly>
+        </div>
+
+        <button type="submit">Create Account</button>
+    </form>
+</div>
+
+<script>
+async function fetchCurrency() {
+    const countryInput = document.getElementById("country");
+    const currencyInput = document.getElementById("currency");
+    const statusMsg = document.getElementById("status-msg");
+    const countryName = countryInput.value.trim();
+
+    // Reset if empty
+    if (!countryName) {
+        currencyInput.value = "";
+        statusMsg.innerText = "";
+        return;
+    }
+
+    // UI: Set loading state
+    statusMsg.innerText = "Searching database...";
+    statusMsg.className = "message text-loading";
+    currencyInput.value = "Fetching...";
+
+    try {
+        // Using fullText=true to avoid fuzzy match errors (e.g. 'India' vs 'British Indian Ocean Territory')
+        const res = await fetch(
+            `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
+        );
+
+        if (!res.ok) throw new Error("Country not found");
+
+        const data = await res.json();
+
+        // Safety check to ensure currency data exists
+        if (!data[0] || !data[0].currencies) {
+            throw new Error("No currency data");
+        }
+
+        const currencyObj = data[0].currencies;
+        const currencyCode = Object.keys(currencyObj)[0];
+        const currencyNameStr = currencyObj[currencyCode].name;
+
+        // UI: Success state
+        currencyInput.value = `${currencyCode} - ${currencyNameStr}`;
+        statusMsg.innerText = "Currency located ✓";
+        statusMsg.className = "message text-success";
+
+    } catch (error) {
+        console.error(error);
+        currencyInput.value = ""; // Clear invalid data
+        statusMsg.innerText = "Country not found. Check spelling.";
+        statusMsg.className = "message text-error";
+    }
+}
+
+function handleSignup(event) {
+    event.preventDefault(); // Prevents page reload
+    const email = document.getElementById("email").value;
+    const currency = document.getElementById("currency").value;
+    const country = document.getElementById("country").value;
+    
+    if(!currency) {
+        alert("Please enter a valid country to detect currency first.");
+        return;
+    }
+
+    alert(`SUCCESS!\n\nUser: ${email}\nCountry: ${country}\nCurrency: ${currency}`);
+}
+</script>
+
+<button onclick="goToLogin()" 
+style="background:#2c3e50; margin-top:10px;">
+Login
+</button>
+
+<script>
+function goToLogin() {
+    window.location.href = "login.html";
+}
+</script>
+
+
+</body>
+</html>
