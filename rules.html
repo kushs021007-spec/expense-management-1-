@@ -13,7 +13,7 @@ body{
 
 .container{
     background:white;
-    max-width:600px;
+    max-width:800px;
     margin:auto;
     padding:30px;
     border-radius:10px;
@@ -39,19 +39,50 @@ input, select{
     border:1px solid #ccc;
 }
 
-button{
-    margin-top:20px;
+.currency-box{
+    display:flex;
+    align-items:center;
+}
+
+.currency-box span{
+    margin-left:10px;
+    font-weight:bold;
+}
+
+table{
     width:100%;
-    padding:12px;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#4a90e2;
+    color:white;
+}
+
+button{
+    margin-top:15px;
+    padding:8px 12px;
     background:#4a90e2;
     color:white;
     border:none;
-    border-radius:6px;
+    border-radius:4px;
     cursor:pointer;
 }
 
 button:hover{
     background:#357abd;
+}
+
+.arrow-btn{
+    padding:4px 8px;
+    margin:2px;
 }
 </style>
 </head>
@@ -59,23 +90,36 @@ button:hover{
 <body>
 
 <div class="container">
+
 <h2>CFO Rule Settings</h2>
 
 <label>User Name</label>
 <select id="user" onchange="autoFillManager()"></select>
 
-<label>Manager Name</label>
-<select id="manager"></select>
+<label>Manager</label>
+<input type="text" id="manager" readonly>
 
-<label>Manager Approval Limit (₹)</label>
-<input type="number" id="limit"
-placeholder="Enter max approval amount">
+<label>Manager Approval Limit</label>
+<div class="currency-box">
+    <input type="number" id="limit" placeholder="Enter max approval amount">
+    <span id="currency"></span>
+</div>
 
-<label>Mandatory Middleman Approvers (comma separated)</label>
-<input type="text" id="middleman"
-placeholder="Example: FinanceHead, Auditor">
+<h3 style="margin-top:25px;">Approvers</h3>
 
-<button onclick="saveRules()">Save Rules</button>
+<table id="approverTable">
+<thead>
+<tr>
+    <th>Sr.No.</th>
+    <th>User</th>
+    <th>Required</th>
+    <th>Position</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<button onclick="addApprover()">+ Add User</button>
 <button onclick="goBack()">Back</button>
 
 </div>
@@ -84,18 +128,15 @@ placeholder="Example: FinanceHead, Auditor">
 
 let usersData = [];
 
-// Load users from localStorage
+// Load users & currency
 window.onload = function(){
 
     usersData = JSON.parse(localStorage.getItem("users")) || [];
 
     const userDropdown = document.getElementById("user");
-    const managerDropdown = document.getElementById("manager");
 
     userDropdown.innerHTML = "";
-    managerDropdown.innerHTML = "";
 
-    // Fill user dropdown (all users)
     usersData.forEach(user => {
         let option = document.createElement("option");
         option.value = user.name;
@@ -103,91 +144,115 @@ window.onload = function(){
         userDropdown.add(option);
     });
 
-    // Fill manager dropdown (only managers)
-    usersData
-        .filter(user => user.role === "manager")
-        .forEach(manager => {
-            let option = document.createElement("option");
-            option.value = manager.name;
-            option.text = manager.name;
-            managerDropdown.add(option);
-        });
+    loadCurrency();
 };
 
 
-// Auto-fill manager when user selected
+// Auto fill manager
 function autoFillManager(){
 
-    const selectedUser =
-        document.getElementById("user").value;
-
-    const managerDropdown =
-        document.getElementById("manager");
-
-    const userObj =
-        usersData.find(u => u.name === selectedUser);
+    const selectedUser = document.getElementById("user").value;
+    const userObj = usersData.find(u => u.name === selectedUser);
 
     if(userObj){
-
         if(userObj.role === "manager"){
-
-            managerDropdown.innerHTML = "<option>-</option>";
-            managerDropdown.disabled = true;
-
+            document.getElementById("manager").value = "-";
         } else {
-
-            managerDropdown.disabled = false;
-            managerDropdown.innerHTML = "";
-
-            // refill managers
-            usersData
-                .filter(u => u.role === "manager")
-                .forEach(manager => {
-                    let option = document.createElement("option");
-                    option.value = manager.name;
-                    option.text = manager.name;
-                    managerDropdown.add(option);
-                });
-
-            managerDropdown.value = userObj.manager;
+            document.getElementById("manager").value = userObj.manager || "-";
         }
     }
 }
 
 
-// Save Rules Logic
-function saveRules(){
+// Load currency from signup
+function loadCurrency(){
 
-    const user = document.getElementById("user").value;
-    const manager = document.getElementById("manager").value;
-    const limit = document.getElementById("limit").value;
+    const cfo = JSON.parse(localStorage.getItem("cfoAccount"));
 
-    const middlemen =
-        document.getElementById("middleman").value
-        .split(",")
-        .map(name => name.trim())
-        .filter(name => name !== "");
+    if(!cfo) return;
 
-    let requiredApproval = 1;
-
-    if(middlemen.length > 1){
-        requiredApproval = Math.ceil(middlemen.length * 0.66);
-    }
-
-    alert(
-`Rules Saved ✅
-
-User: ${user}
-Manager: ${manager}
-Max Approval: ₹${limit}
-
-Middlemen: ${middlemen.join(", ") || "None"}
-Required Approvals: ${requiredApproval}`
-    );
+    fetch(`https://restcountries.com/v3.1/name/${cfo.country}`)
+    .then(res => res.json())
+    .then(data => {
+        const currencyObj = data[0].currencies;
+        const code = Object.keys(currencyObj)[0];
+        document.getElementById("currency").innerText = code;
+    })
+    .catch(() => {
+        document.getElementById("currency").innerText = "";
+    });
 }
 
 
-// Back to Account Page
+// Add approver row
+function addApprover(){
+
+    const table = document
+        .getElementById("approverTable")
+        .getElementsByTagName("tbody")[0];
+
+    const row = table.insertRow();
+
+    const srCell = row.insertCell(0);
+    const userCell = row.insertCell(1);
+    const reqCell = row.insertCell(2);
+    const posCell = row.insertCell(3);
+
+    srCell.innerText = table.rows.length;
+
+    // User dropdown
+    let select = document.createElement("select");
+
+    usersData.forEach(user => {
+        let option = document.createElement("option");
+        option.value = user.name;
+        option.text = user.name;
+        select.add(option);
+    });
+
+    userCell.appendChild(select);
+
+    // Required checkbox
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    reqCell.appendChild(checkbox);
+
+    // Position arrows
+    posCell.innerHTML = `
+        <button class="arrow-btn" onclick="moveUp(this)">⬆</button>
+        <button class="arrow-btn" onclick="moveDown(this)">⬇</button>
+    `;
+}
+
+
+// Move Up
+function moveUp(btn){
+    const row = btn.closest("tr");
+    const prev = row.previousElementSibling;
+    if(prev){
+        row.parentNode.insertBefore(row, prev);
+        updateSerial();
+    }
+}
+
+// Move Down
+function moveDown(btn){
+    const row = btn.closest("tr");
+    const next = row.nextElementSibling;
+    if(next){
+        row.parentNode.insertBefore(next, row);
+        updateSerial();
+    }
+}
+
+// Update Serial Numbers
+function updateSerial(){
+    const rows = document.querySelectorAll("#approverTable tbody tr");
+    rows.forEach((row, index) => {
+        row.cells[0].innerText = index + 1;
+    });
+}
+
 function goBack(){
     window.location.href = "account_creation.html";
 }
@@ -196,3 +261,5 @@ function goBack(){
 
 </body>
 </html>
+
+
