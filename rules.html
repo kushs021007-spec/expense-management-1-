@@ -1,201 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rule Settings</title>
+<title>CFO Rule Settings</title>
 
 <style>
-    * { box-sizing: border-box; }
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f7;
+    padding:40px;
+}
 
-    body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        background: #eef2f7;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+.container{
+    background:white;
+    max-width:600px;
+    margin:auto;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
 
-    .container {
-        background: white;
-        padding: 40px;
-        width: 100%;
-        max-width: 550px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
+h2{
+    text-align:center;
+    color:#2c3e50;
+}
 
-    h2 { 
-        text-align: center; 
-        color: #2c3e50; 
-        margin-bottom: 30px;
-        margin-top: 0;
-    }
+label{
+    font-weight:bold;
+    display:block;
+    margin-top:15px;
+}
 
-    /* Centering the entities */
-    .input-group {
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center; 
-    }
+input, select{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
 
-    label {
-        width: 85%;
-        font-weight: bold;
-        color: #34495e;
-        margin-bottom: 8px;
-        font-size: 14px;
-    }
+button{
+    margin-top:20px;
+    width:100%;
+    padding:12px;
+    background:#4a90e2;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
 
-    input, select {
-        width: 85%;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #fff;
-        font-size: 14px;
-    }
-
-    .note {
-        width: 85%;
-        margin: 10px auto 0 auto;
-        font-size: 13px;
-        color: #7f8c8d;
-        line-height: 1.4;
-        text-align: left;
-    }
-
-    /* Right-bottom button alignment */
-    .button-group {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 30px;
-        padding-right: 7.5%; /* Aligns with input edges */
-    }
-
-    button {
-        padding: 12px 24px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: 0.2s;
-    }
-
-    .btn-cancel {
-        background: #f8f9fa;
-        color: #636e72;
-        border: 1px solid #dfe6e9;
-    }
-
-    .btn-cancel:hover { background: #f1f2f6; }
-
-    .btn-save {
-        background: #4a90e2;
-        color: white;
-    }
-
-    .btn-save:hover { background: #357abd; }
+button:hover{
+    background:#357abd;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h2>CFO Rule Settings</h2>
+<h2>CFO Rule Settings</h2>
 
-    <form id="ruleForm">
-        <div class="input-group">
-            <label for="user">User Name</label>
-            <select id="user"></select>
+<label>User Name</label>
+<select id="user" onchange="autoFillManager()"></select>
 
+<label>Manager Name</label>
+<select id="manager"></select>
 
-        </div>
+<label>Manager Approval Limit (₹)</label>
+<input type="number" id="limit"
+placeholder="Enter max approval amount">
 
-        <div class="input-group">
-            <label for="manager">Manager Name</label>
-            <select id="manager"></select>
-        </div>
+<label>Mandatory Middleman Approvers (comma separated)</label>
+<input type="text" id="middleman"
+placeholder="Example: FinanceHead, Auditor">
 
-        <div class="input-group">
-            <label for="limit">Manager Approval Limit (₹)</label>
-            <input type="number" id="limit" placeholder="Enter max approval amount">
-        </div>
+<button onclick="saveRules()">Save Rules</button>
+<button onclick="goBack()">Back</button>
 
-        <div class="input-group">
-            <label for="middleman">Mandatory Middleman Approvers</label>
-            <input type="text" id="middleman" placeholder="FinanceHead, Auditor">
-            <p class="note">
-                💡 If multiple middlemen are added, a minimum <b>66% approval</b> threshold is automatically enforced.
-            </p>
-        </div>
-
-        <div class="button-group">
-            <button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
-            <button type="button" class="btn-save" onclick="saveRules()">Save Rules</button>
-        </div>
-    </form>
 </div>
 
 <script>
-function saveRules(){
-    const user = document.getElementById("user").value;
-    const manager = document.getElementById("manager").value;
-    const limit = document.getElementById("limit").value;
-    const middlemanInput = document.getElementById("middleman").value;
 
-    const middlemen = middlemanInput
-        .split(",")
-        .map(name => name.trim())
-        .filter(name => name !== "");
+let usersData = [];
 
-    // Logic: Calculate required approvals (66% rule)
-    let requiredApproval = 1;
-    if(middlemen.length > 1){
-        requiredApproval = Math.ceil(middlemen.length * 0.66);
-    } else if (middlemen.length === 0) {
-        requiredApproval = 0;
-    }
+// Load users from localStorage
+window.onload = function(){
 
-    alert(
-        `RULES CONFIGURED\n` +
-        `--------------------------\n` +
-        `Target User: ${user}\n` +
-        `Primary Manager: ${manager}\n` +
-        `Limit: ₹${limit}\n` +
-        `Middlemen: ${middlemen.join(", ") || "None"}\n` +
-        `Required Middlemen Votes: ${requiredApproval}`
-    );
-}
-
-function resetForm() {
-    if(confirm("Are you sure you want to discard changes?")) {
-        document.getElementById("ruleForm").reset();
-    }
-}
-</script>
-
-<button onclick="goBack()">Back</button>
-
-<script>
-function goBack(){
-    window.location.href = "account_creation.html";
-}
-</script>
-
-<script>
-function loadUsers(){
-
-    const employees =
-        JSON.parse(localStorage.getItem("employees")) || [];
-
-    const managers =
-        JSON.parse(localStorage.getItem("managers")) || [];
+    usersData = JSON.parse(localStorage.getItem("users")) || [];
 
     const userDropdown = document.getElementById("user");
     const managerDropdown = document.getElementById("manager");
@@ -203,22 +95,103 @@ function loadUsers(){
     userDropdown.innerHTML = "";
     managerDropdown.innerHTML = "";
 
-    // Employees
-    employees.forEach(emp => {
+    // Fill user dropdown (all users)
+    usersData.forEach(user => {
         let option = document.createElement("option");
-        option.text = emp;
+        option.value = user.name;
+        option.text = user.name;
         userDropdown.add(option);
     });
 
-    // Managers
-    managers.forEach(mgr => {
-        let option = document.createElement("option");
-        option.text = mgr;
-        managerDropdown.add(option);
-    });
+    // Fill manager dropdown (only managers)
+    usersData
+        .filter(user => user.role === "manager")
+        .forEach(manager => {
+            let option = document.createElement("option");
+            option.value = manager.name;
+            option.text = manager.name;
+            managerDropdown.add(option);
+        });
+};
+
+
+// Auto-fill manager when user selected
+function autoFillManager(){
+
+    const selectedUser =
+        document.getElementById("user").value;
+
+    const managerDropdown =
+        document.getElementById("manager");
+
+    const userObj =
+        usersData.find(u => u.name === selectedUser);
+
+    if(userObj){
+
+        if(userObj.role === "manager"){
+
+            managerDropdown.innerHTML = "<option>-</option>";
+            managerDropdown.disabled = true;
+
+        } else {
+
+            managerDropdown.disabled = false;
+            managerDropdown.innerHTML = "";
+
+            // refill managers
+            usersData
+                .filter(u => u.role === "manager")
+                .forEach(manager => {
+                    let option = document.createElement("option");
+                    option.value = manager.name;
+                    option.text = manager.name;
+                    managerDropdown.add(option);
+                });
+
+            managerDropdown.value = userObj.manager;
+        }
+    }
 }
 
-window.onload = loadUsers;
+
+// Save Rules Logic
+function saveRules(){
+
+    const user = document.getElementById("user").value;
+    const manager = document.getElementById("manager").value;
+    const limit = document.getElementById("limit").value;
+
+    const middlemen =
+        document.getElementById("middleman").value
+        .split(",")
+        .map(name => name.trim())
+        .filter(name => name !== "");
+
+    let requiredApproval = 1;
+
+    if(middlemen.length > 1){
+        requiredApproval = Math.ceil(middlemen.length * 0.66);
+    }
+
+    alert(
+`Rules Saved ✅
+
+User: ${user}
+Manager: ${manager}
+Max Approval: ₹${limit}
+
+Middlemen: ${middlemen.join(", ") || "None"}
+Required Approvals: ${requiredApproval}`
+    );
+}
+
+
+// Back to Account Page
+function goBack(){
+    window.location.href = "account_creation.html";
+}
+
 </script>
 
 </body>
