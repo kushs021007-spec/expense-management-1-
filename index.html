@@ -1,91 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Expense Management - Login</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #eef2f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<meta charset="UTF-8">
+<title>CFO Login</title>
 
-        .login-container {
-            background: #ffffff;
-            padding: 40px;
-            width: 350px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-        .login-container h2 {
-            margin-bottom: 25px;
-            color: #2c3e50;
-        }
+.login-container {
+    background: #ffffff;
+    padding: 40px;
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
 
-        .input-box {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
 
-        .input-box:focus {
-            border-color: #4a90e2;
-            outline: none;
-        }
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
 
-        .signup-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+input:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
 
-        .signup-btn:hover {
-            background-color: #357abd;
-        }
-    </style>
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #357abd;
+}
+
+.signup-link {
+    display: block;
+    margin-top: 15px;
+    text-decoration: none;
+    color: #4a90e2;
+    font-weight: bold;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="login-container">
-        <h2>Login</h2>
-        <input type="email" class="input-box" placeholder="Enter Gmail" required>
-        <input type="password" class="input-box" placeholder="Enter Password" required>
-        <button onclick="goToSignup()" class="signup-btn">Sign Up</button>
+<div class="login-container">
+    <h2>CFO Login</h2>
 
-        <script>
-        function goToSignup() {
-        window.location.href = "cfo_signup.html";
-        }
-        </script>
+    <input type="email" id="gmail" placeholder="Enter Gmail">
+    <input type="password" id="password" placeholder="Enter Password">
 
-        <button onclick="signup()">Sign Up</button>
+    <button onclick="login()">Login</button>
 
-        <script>
-        function signup(){
-            // later you will save data in database here
-            alert("Signup Successful ✅");
-            window.location.href = "account_creation.html";
-        }
-        </script>
+    <a href="cfo_signup.html" class="signup-link">Sign Up</a>
+</div>
 
-    </div>
+<script>
+function login(){
 
+    const gmail = document.getElementById("gmail").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if(gmail === "" || password === ""){
+        alert("Please enter both Gmail and Password ❗");
+        return;
+    }
+
+    // Later you can add real authentication here
+
+    alert("Login Successful ✅");
+    window.location.href = "account_creation.html";
+}
+</script>
 
 </body>
 </html>
