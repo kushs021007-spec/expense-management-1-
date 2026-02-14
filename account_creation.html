@@ -177,9 +177,34 @@ function addUser(){
 
     table.appendChild(newRow);
 }
+function saveUsersToStorage() {
+
+    const rows = document.querySelectorAll("#userTable tr");
+
+    let employees = [];
+    let managers = [];
+
+    rows.forEach(row => {
+        const name = row.cells[0].querySelector("input").value;
+        const role = row.cells[1].querySelector("select").value;
+
+        if(name && role){
+            if(role === "manager"){
+                managers.push(name);
+            } else if(role === "employee"){
+                employees.push(name);
+            }
+        }
+    });
+
+    localStorage.setItem("employees", JSON.stringify(employees));
+    localStorage.setItem("managers", JSON.stringify(managers));
+}
+
 
 // Open Rule Page
-function openRules(){
+function goToRules(){
+    saveUsersToStorage();   // save names first
     window.location.href = "rules.html";
 }
 
@@ -187,3 +212,4 @@ function openRules(){
 
 </body>
 </html>
+
