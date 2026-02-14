@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rule Settings</title>
+
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #eef2f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        padding: 40px;
+        width: 100%;
+        max-width: 550px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    h2 { 
+        text-align: center; 
+        color: #2c3e50; 
+        margin-bottom: 30px;
+        margin-top: 0;
+    }
+
+    /* Centering the entities */
+    .input-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+    }
+
+    label {
+        width: 85%;
+        font-weight: bold;
+        color: #34495e;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    input, select {
+        width: 85%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+        font-size: 14px;
+    }
+
+    .note {
+        width: 85%;
+        margin: 10px auto 0 auto;
+        font-size: 13px;
+        color: #7f8c8d;
+        line-height: 1.4;
+        text-align: left;
+    }
+
+    /* Right-bottom button alignment */
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 30px;
+        padding-right: 7.5%; /* Aligns with input edges */
+    }
+
+    button {
+        padding: 12px 24px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .btn-cancel {
+        background: #f8f9fa;
+        color: #636e72;
+        border: 1px solid #dfe6e9;
+    }
+
+    .btn-cancel:hover { background: #f1f2f6; }
+
+    .btn-save {
+        background: #4a90e2;
+        color: white;
+    }
+
+    .btn-save:hover { background: #357abd; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>CFO Rule Settings</h2>
+
+    <form id="ruleForm">
+        <div class="input-group">
+            <label for="user">User Name</label>
+            <select id="user">
+                <option>Employee 1</option>
+                <option>Employee 2</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="manager">Manager Name</label>
+            <select id="manager">
+                <option>Manager A</option>
+                <option>Manager B</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="limit">Manager Approval Limit (₹)</label>
+            <input type="number" id="limit" placeholder="Enter max approval amount">
+        </div>
+
+        <div class="input-group">
+            <label for="middleman">Mandatory Middleman Approvers</label>
+            <input type="text" id="middleman" placeholder="FinanceHead, Auditor">
+            <p class="note">
+                💡 If multiple middlemen are added, a minimum <b>66% approval</b> threshold is automatically enforced.
+            </p>
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
+            <button type="button" class="btn-save" onclick="saveRules()">Save Rules</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function saveRules(){
+    const user = document.getElementById("user").value;
+    const manager = document.getElementById("manager").value;
+    const limit = document.getElementById("limit").value;
+    const middlemanInput = document.getElementById("middleman").value;
+
+    const middlemen = middlemanInput
+        .split(",")
+        .map(name => name.trim())
+        .filter(name => name !== "");
+
+    // Logic: Calculate required approvals (66% rule)
+    let requiredApproval = 1;
+    if(middlemen.length > 1){
+        requiredApproval = Math.ceil(middlemen.length * 0.66);
+    } else if (middlemen.length === 0) {
+        requiredApproval = 0;
+    }
+
+    alert(
+        `RULES CONFIGURED\n` +
+        `--------------------------\n` +
+        `Target User: ${user}\n` +
+        `Primary Manager: ${manager}\n` +
+        `Limit: ₹${limit}\n` +
+        `Middlemen: ${middlemen.join(", ") || "None"}\n` +
+        `Required Middlemen Votes: ${requiredApproval}`
+    );
+}
+
+function resetForm() {
+    if(confirm("Are you sure you want to discard changes?")) {
+        document.getElementById("ruleForm").reset();
+    }
+}
+</script>
+
+</body>
+</html>
