@@ -112,18 +112,14 @@
     <form id="ruleForm">
         <div class="input-group">
             <label for="user">User Name</label>
-            <select id="user">
-                <option>Employee 1</option>
-                <option>Employee 2</option>
-            </select>
+            <select id="user"></select>
+
+
         </div>
 
         <div class="input-group">
             <label for="manager">Manager Name</label>
-            <select id="manager">
-                <option>Manager A</option>
-                <option>Manager B</option>
-            </select>
+            <select id="manager"></select>
         </div>
 
         <div class="input-group">
@@ -192,6 +188,38 @@ function goBack(){
 }
 </script>
 
+<script>
+function loadUsers(){
+
+    const employees =
+        JSON.parse(localStorage.getItem("employees")) || [];
+
+    const managers =
+        JSON.parse(localStorage.getItem("managers")) || [];
+
+    const userDropdown = document.getElementById("user");
+    const managerDropdown = document.getElementById("manager");
+
+    userDropdown.innerHTML = "";
+    managerDropdown.innerHTML = "";
+
+    // Employees
+    employees.forEach(emp => {
+        let option = document.createElement("option");
+        option.text = emp;
+        userDropdown.add(option);
+    });
+
+    // Managers
+    managers.forEach(mgr => {
+        let option = document.createElement("option");
+        option.text = mgr;
+        managerDropdown.add(option);
+    });
+}
+
+window.onload = loadUsers;
+</script>
 
 </body>
 </html>
