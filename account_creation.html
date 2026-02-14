@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Account Creation - CFO</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f7;
+    padding:40px;
+}
+
+h2{
+    text-align:center;
+    color:#2c3e50;
+}
+
+table{
+    width:100%;
+    background:white;
+    border-collapse: collapse;
+    margin-top:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+th, td{
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+
+th{
+    background:#4a90e2;
+    color:white;
+}
+
+input, select{
+    padding:6px;
+    width:90%;
+}
+
+button{
+    padding:6px 12px;
+    background:#4a90e2;
+    color:white;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#357abd;
+}
+
+.rules-link{
+    display:block;
+    margin-top:25px;
+    text-align:center;
+    font-weight:bold;
+    color:#2c3e50;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<h2>CFO - Create Accounts</h2>
+
+<table>
+<tr>
+    <th>User Name</th>
+    <th>Role</th>
+    <th>Manager</th>
+    <th>Gmail</th>
+    <th>Password</th>
+</tr>
+
+<tr>
+    <td><input type="text" placeholder="Enter Name"></td>
+
+    <td>
+        <select onchange="updateManager(this)">
+            <option value="">Select</option>
+            <option value="manager">Manager</option>
+            <option value="employee">Employee</option>
+        </select>
+    </td>
+
+    <td><input type="text" placeholder="Manager Name" class="manager-field"></td>
+
+    <td><input type="email" placeholder="Enter Gmail"></td>
+
+    <td>
+        <button onclick="generatePassword()">Send</button>
+    </td>
+</tr>
+
+</table>
+
+<a href="rules.html" class="rules-link">Set Rules</a>
+
+<script>
+
+function updateManager(selectElement){
+    let row = selectElement.parentElement.parentElement;
+    let managerField = row.querySelector(".manager-field");
+
+    if(selectElement.value === "manager"){
+        managerField.value = "-";
+        managerField.disabled = true;
+    } else {
+        managerField.value = "";
+        managerField.disabled = false;
+    }
+}
+
+function generatePassword(){
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
+    for(let i=0;i<10;i++){
+        password += chars.charAt(Math.floor(Math.random()*chars.length));
+    }
+
+    alert("Auto Generated Password: " + password +
+    "\n(Email sending requires backend integration)");
+}
+
+</script>
+
+</body>
+</html>
