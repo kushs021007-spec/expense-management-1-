@@ -13,7 +13,7 @@ body{
 
 .container{
     background:white;
-    max-width:800px;
+    max-width:850px;
     margin:auto;
     padding:30px;
     border-radius:10px;
@@ -120,6 +120,7 @@ button:hover{
 </table>
 
 <button onclick="addApprover()">+ Add User</button>
+<button onclick="saveRules()">Save Rules</button>
 <button onclick="goBack()">Back</button>
 
 </div>
@@ -127,14 +128,15 @@ button:hover{
 <script>
 
 let usersData = [];
+let allRules = {};
 
-// Load users & currency
+// On Load
 window.onload = function(){
 
     usersData = JSON.parse(localStorage.getItem("users")) || [];
+    allRules = JSON.parse(localStorage.getItem("rulesData")) || {};
 
     const userDropdown = document.getElementById("user");
-
     userDropdown.innerHTML = "";
 
     usersData.forEach(user => {
@@ -148,7 +150,7 @@ window.onload = function(){
 };
 
 
-// Auto fill manager
+// Auto fill manager & load saved rules
 function autoFillManager(){
 
     const selectedUser = document.getElementById("user").value;
@@ -158,17 +160,19 @@ function autoFillManager(){
         if(userObj.role === "manager"){
             document.getElementById("manager").value = "-";
         } else {
-            document.getElementById("manager").value = userObj.manager || "-";
+            document.getElementById("manager").value =
+                userObj.manager || "-";
         }
     }
+
+    loadSavedRules(selectedUser);
 }
 
 
-// Load currency from signup
+// Load Currency from Signup Page
 function loadCurrency(){
 
     const cfo = JSON.parse(localStorage.getItem("cfoAccount"));
-
     if(!cfo) return;
 
     fetch(`https://restcountries.com/v3.1/name/${cfo.country}`)
@@ -184,23 +188,104 @@ function loadCurrency(){
 }
 
 
-// Add approver row
+// Save Rules User-wise
+function saveRules(){
+
+    const user = document.getElementById("user").value;
+    const limit = document.getElementById("limit").value;
+
+    const rows =
+        document.querySelectorAll("#approverTable tbody tr");
+
+    let approvers = [];
+
+    rows.forEach(row => {
+
+        const name =
+            row.cells[1].querySelector("select").value;
+
+        const required =
+            row.cells[2].querySelector("input").checked;
+
+        approvers.push({name, required});
+    });
+
+    allRules[user] = {
+        limit,
+        approvers
+    };
+
+    localStorage.setItem("rulesData",
+        JSON.stringify(allRules));
+
+    alert("Rules Saved Successfully ✅");
+}
+
+
+// Load Saved Rules
+function loadSavedRules(user){
+
+    document.getElementById("limit").value = "";
+
+    const tbody =
+        document.querySelector("#approverTable tbody");
+
+    tbody.innerHTML = "";
+
+    if(!allRules[user]) return;
+
+    document.getElementById("limit").value =
+        allRules[user].limit;
+
+    allRules[user].approvers.forEach((app, index) => {
+
+        const row = tbody.insertRow();
+
+        row.insertCell(0).innerText = index + 1;
+
+        const userCell = row.insertCell(1);
+        const reqCell = row.insertCell(2);
+        const posCell = row.insertCell(3);
+
+        let select = document.createElement("select");
+
+        usersData.forEach(u => {
+            let option = document.createElement("option");
+            option.value = u.name;
+            option.text = u.name;
+            if(u.name === app.name) option.selected = true;
+            select.add(option);
+        });
+
+        userCell.appendChild(select);
+
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = app.required;
+        reqCell.appendChild(checkbox);
+
+        posCell.innerHTML = `
+            <button class="arrow-btn" onclick="moveUp(this)">⬆</button>
+            <button class="arrow-btn" onclick="moveDown(this)">⬇</button>
+        `;
+    });
+}
+
+
+// Add Approver Row
 function addApprover(){
 
-    const table = document
-        .getElementById("approverTable")
-        .getElementsByTagName("tbody")[0];
+    const tbody =
+        document.querySelector("#approverTable tbody");
 
-    const row = table.insertRow();
+    const row = tbody.insertRow();
 
-    const srCell = row.insertCell(0);
+    row.insertCell(0).innerText = tbody.rows.length;
+
     const userCell = row.insertCell(1);
     const reqCell = row.insertCell(2);
     const posCell = row.insertCell(3);
 
-    srCell.innerText = table.rows.length;
-
-    // User dropdown
     let select = document.createElement("select");
 
     usersData.forEach(user => {
@@ -212,12 +297,10 @@ function addApprover(){
 
     userCell.appendChild(select);
 
-    // Required checkbox
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     reqCell.appendChild(checkbox);
 
-    // Position arrows
     posCell.innerHTML = `
         <button class="arrow-btn" onclick="moveUp(this)">⬆</button>
         <button class="arrow-btn" onclick="moveDown(this)">⬇</button>
@@ -235,6 +318,7 @@ function moveUp(btn){
     }
 }
 
+
 // Move Down
 function moveDown(btn){
     const row = btn.closest("tr");
@@ -245,14 +329,18 @@ function moveDown(btn){
     }
 }
 
+
 // Update Serial Numbers
 function updateSerial(){
-    const rows = document.querySelectorAll("#approverTable tbody tr");
+    const rows =
+        document.querySelectorAll("#approverTable tbody tr");
     rows.forEach((row, index) => {
         row.cells[0].innerText = index + 1;
     });
 }
 
+
+// Back Button
 function goBack(){
     window.location.href = "account_creation.html";
 }
@@ -261,5 +349,7 @@ function goBack(){
 
 </body>
 </html>
+
+
 
 
