@@ -68,7 +68,7 @@ display:flex;justify-content:space-between;
 </div>
 
 <script>
-if(localStorage.getItem("loggedInRole") !== "manager"){
+if(localStorage.getItem("role") !== "manager"){
     window.location.href = "index.html";
 }
 let receipts =
@@ -142,4 +142,5 @@ load();
 </body>
 
 </html>
+
 
