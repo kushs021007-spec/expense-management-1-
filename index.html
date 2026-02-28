@@ -83,51 +83,60 @@ button:hover {
 </div>
 
 <script>
-function login(){
+async function login(){
 
-    const gmail = document.getElementById("gmail").value.trim();
+    const email = document.getElementById("gmail").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    if(gmail === "" || password === ""){
-        alert("Please enter Gmail and Password");
+    if(!email || !password){
+        alert("Enter email and password");
         return;
     }
 
-    // Load all users created by CFO
-    const users =
-    JSON.parse(localStorage.getItem("users")) || [];
+    try{
 
-    // Load CFO account
-    const cfo =
-    JSON.parse(localStorage.getItem("cfoAccount"));
+        const response = await fetch(
+            "https://expense-backend-a2t0.onrender.com/api/auth/login",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({ email, password })
+            }
+        );
 
-    // 🔹 Check CFO Login
-    if(cfo && gmail === cfo.gmail && password === cfo.password){
-        localStorage.setItem("loggedInRole","cfo");
-        window.location.href = "account_creation.html";
-        return;
-    }
+        const data = await response.json();
 
-    // 🔹 Check Manager / Employee Login
-    const user = users.find(u => u.gmail === gmail);
+        if(!response.ok){
+            alert(data.message);
+            return;
+        }
 
-    if(user){
-        if(user.role === "manager"){
-            localStorage.setItem("loggedInRole","manager");
+        // ✅ Store token
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+
+        // ✅ Redirect based on role
+        if(data.role === "employee"){
+            window.location.href = "employee_dashboard.html";
+        }
+        else if(data.role === "manager"){
             window.location.href = "manager_dashboard.html";
         }
         else{
-            localStorage.setItem("loggedInRole","employee");
-            window.location.href = "employee_dashboard.html";
+            window.location.href = "account_creation.html";
         }
-    }
-    else{
-        alert("Invalid Login Details");
+
+    } catch(error){
+        alert("Server error");
+        console.error(error);
     }
 }
 </script>
 </body>
 </html>
+
 
 
 
