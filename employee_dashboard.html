@@ -18,6 +18,9 @@ body{
     padding:25px;
     border-radius:10px;
     box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    <div style="text-align:right;">
+    <button onclick="logout()">Logout</button>
+</div>
 }
 
 button{
@@ -96,6 +99,11 @@ function newReceipt(){
     window.location.href="upload_receipt.html";
 }
 
+function logout(){
+    localStorage.removeItem("loggedInRole");
+    window.location.href = "index.html";
+}
+
 function load(){
 
     const table =
@@ -169,4 +177,5 @@ load();
 </script>
 
 </body>
+
 </html>
