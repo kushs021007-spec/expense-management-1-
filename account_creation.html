@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>CFO - Account Creation</title>
+<title>CFO - Create User</title>
 
 <style>
 body{
@@ -54,7 +54,7 @@ button{
     <button onclick="logout()">Logout</button>
 </div>
 
-<h2>Create User</h2>
+<h2>Create New User</h2>
 
 <label>Name</label>
 <input type="text" id="name">
@@ -74,7 +74,7 @@ button{
 
 <script>
 
-/* 🔐 Protect Page - CFO Only */
+/* 🔐 Protect Page (CFO only) */
 if(localStorage.getItem("role") !== "cfo"){
     window.location.href = "index.html";
 }
@@ -118,8 +118,8 @@ async function createUser(){
         document.getElementById("email").value="";
 
     } catch(error){
-        alert("Server error");
         console.error(error);
+        alert("Server error. Check console.");
     }
 }
 
@@ -127,7 +127,7 @@ async function createUser(){
 function logout(){
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    window.location.href="index.html";
+    window.location.href = "index.html";
 }
 
 </script>
