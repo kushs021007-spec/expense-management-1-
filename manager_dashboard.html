@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Manager Dashboard</title>
+
+<style>
+body{font-family:Arial;background:#eef2f7;padding:30px;}
+.container{
+max-width:1000px;margin:auto;background:white;
+padding:25px;border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+button{
+padding:7px 12px;margin:3px;border:none;
+border-radius:5px;cursor:pointer;
+background:#4a90e2;color:white;
+}
+.summary{
+display:flex;justify-content:space-around;
+margin:20px 0;font-weight:bold;
+}
+table{width:100%;border-collapse:collapse;}
+th,td{
+border:1px solid #ddd;padding:8px;text-align:center;
+}
+th{background:#4a90e2;color:white;}
+.delete-btn{background:red;}
+.top-bar{
+display:flex;justify-content:space-between;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top-bar">
+<button onclick="newReceipt()">+ New Receipt</button>
+<button onclick="openApproveList()">Approve List</button>
+</div>
+
+<div class="summary">
+<div>Approved<br>₹<span id="approvedTotal">0</span></div>
+<div>Submitted<br>₹<span id="submittedTotal">0</span></div>
+<div>Denied<br>₹<span id="deniedTotal">0</span></div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Description</th>
+<th>Paid By</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Edit</th>
+<th>Delete</th>
+</tr>
+</thead>
+<tbody id="receiptTable"></tbody>
+</table>
+
+</div>
+
+<script>
+
+let receipts =
+JSON.parse(localStorage.getItem("managerReceipts")) || [];
+
+function newReceipt(){
+localStorage.removeItem("managerEditIndex");
+window.location.href="manager_upload.html";
+}
+
+function openApproveList(){
+window.location.href="manager_approve.html";
+}
+
+function load(){
+
+const table =
+document.getElementById("receiptTable");
+table.innerHTML="";
+
+let approved=0, submitted=0, denied=0;
+
+receipts.forEach((r,index)=>{
+
+let row = table.insertRow();
+
+row.insertCell(0).innerText=r.date;
+row.insertCell(1).innerText=r.desc;
+row.insertCell(2).innerText=r.paidBy;
+row.insertCell(3).innerText=r.amount;
+
+row.insertCell(4).innerText=r.status;
+
+row.insertCell(5).innerHTML=
+`<button onclick="editReceipt(${index})">Edit</button>`;
+
+row.insertCell(6).innerHTML=
+`<button class="delete-btn"
+onclick="deleteReceipt(${index})">🗑</button>`;
+
+if(r.status==="approved") approved+=Number(r.amount);
+if(r.status==="submitted") submitted+=Number(r.amount);
+if(r.status==="rejected") denied+=Number(r.amount);
+
+});
+
+document.getElementById("approvedTotal").innerText=approved;
+document.getElementById("submittedTotal").innerText=submitted;
+document.getElementById("deniedTotal").innerText=denied;
+}
+
+function editReceipt(i){
+localStorage.setItem("managerEditIndex", i);
+window.location.href="manager_upload.html";
+}
+
+function deleteReceipt(i){
+receipts.splice(i,1);
+localStorage.setItem("managerReceipts",
+JSON.stringify(receipts));
+load();
+}
+
+load();
+
+</script>
+</body>
+</html>
