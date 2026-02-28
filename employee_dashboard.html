@@ -90,7 +90,9 @@ th{
 </div>
 
 <script>
-
+if(localStorage.getItem("loggedInRole") !== "employee"){
+    window.location.href = "index.html";
+}
 let receipts =
 JSON.parse(localStorage.getItem("employeeReceipts")) || [];
 
@@ -179,3 +181,4 @@ load();
 </body>
 
 </html>
+
