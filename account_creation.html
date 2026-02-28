@@ -6,63 +6,42 @@
 
 <style>
 body{
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background:#eef2f7;
     padding:40px;
 }
 
 .container{
-    max-width:1000px;
+    max-width:600px;
     margin:auto;
-    <div style="text-align:right;">
-    <button onclick="logout()">Logout</button>
-</div>
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
 h2{
     text-align:center;
-    color:#2c3e50;
-}
-
-table{
-    width:100%;
-    background:white;
-    border-collapse: collapse;
-    margin-top:20px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-th, td{
-    padding:12px;
-    border:1px solid #ddd;
-    text-align:center;
-}
-
-th{
-    background:#4a90e2;
-    color:white;
 }
 
 input, select{
-    padding:6px;
-    width:95%;
+    width:100%;
+    padding:8px;
+    margin:10px 0;
 }
 
 button{
-    padding:6px 12px;
+    padding:8px 14px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
     background:#4a90e2;
     color:white;
-    border:none;
-    border-radius:4px;
-    cursor:pointer;
 }
 
-button:hover{
-    background:#357abd;
-}
-
-.delete-btn{
-    background:red;
+.top-bar{
+    text-align:right;
+    margin-bottom:10px;
 }
 </style>
 </head>
@@ -71,160 +50,87 @@ button:hover{
 
 <div class="container">
 
-<h2>CFO - Create Users</h2>
-
-<table>
-<thead>
-<tr>
-    <th>User Name</th>
-    <th>Role</th>
-    <th>Manager</th>
-    <th>Gmail</th>
-    <th>Password</th>
-    <th>Remove</th>
-</tr>
-</thead>
-
-<tbody id="userTable"></tbody>
-</table>
-
-<div style="text-align:center; margin-top:20px;">
-    <button onclick="addUser()">+ Add User</button>
+<div class="top-bar">
+    <button onclick="logout()">Logout</button>
 </div>
 
-<div style="text-align:center; margin-top:20px;">
-    <button onclick="goToRules()">Set Rules</button>
-</div>
+<h2>Create User</h2>
+
+<label>Name</label>
+<input type="text" id="name">
+
+<label>Email</label>
+<input type="email" id="email">
+
+<label>Role</label>
+<select id="role">
+    <option value="employee">Employee</option>
+    <option value="manager">Manager</option>
+</select>
+
+<button onclick="createUser()">Create User</button>
 
 </div>
-
-<button onclick="openCFOApproval()">CFO Approvals</button>
-
-<script>
-    if(localStorage.getItem("role") !== "cfo"){
-    window.location.href = "index.html";
-}
-function openCFOApproval(){
-    window.location.href = "cfo_approval.html";
-}
-</script>
-
 
 <script>
 
-// Load saved users when page opens
-window.onload = function(){
-    const savedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    savedUsers.forEach(user => createRow(user));
-}
-
-// Add New User
-function addUser(){
-    createRow();
-}
-
-    function logout(){
-    localStorage.removeItem("loggedInRole");
+/* 🔐 Protect Page - CFO Only */
+if(localStorage.getItem("role") !== "cfo"){
     window.location.href = "index.html";
 }
-// Create Row Function
-function createRow(userData = {}){
 
-    const table = document.getElementById("userTable");
-    const row = document.createElement("tr");
+/* 🚀 Create User */
+async function createUser(){
 
-    row.innerHTML = `
-        <td><input type="text" value="${userData.name || ""}" placeholder="Enter Name"></td>
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const role = document.getElementById("role").value;
 
-        <td>
-            <select onchange="updateManager(this)">
-                <option value="">Select</option>
-                <option value="manager" ${userData.role==="manager"?"selected":""}>Manager</option>
-                <option value="employee" ${userData.role==="employee"?"selected":""}>Employee</option>
-            </select>
-        </td>
-
-        <td><input type="text" class="manager-field"
-            value="${userData.manager || ""}"
-            placeholder="Manager Name"></td>
-
-        <td><input type="email"
-            value="${userData.gmail || ""}"
-            placeholder="Enter Gmail"></td>
-
-        <td><button onclick="generatePassword()">Send</button></td>
-
-        <td><button class="delete-btn" onclick="deleteRow(this)">🗑</button></td>
-    `;
-
-    table.appendChild(row);
-    saveAllUsers();
-}
-
-// Delete Row
-function deleteRow(btn){
-    btn.parentElement.parentElement.remove();
-    saveAllUsers();
-}
-
-// Auto Manager Disable
-function updateManager(selectElement){
-    let row = selectElement.parentElement.parentElement;
-    let managerField = row.querySelector(".manager-field");
-
-    if(selectElement.value === "manager"){
-        managerField.value = "-";
-        managerField.disabled = true;
-    } else {
-        managerField.value = "";
-        managerField.disabled = false;
+    if(!name || !email){
+        alert("Please fill all fields");
+        return;
     }
 
-    saveAllUsers();
-}
+    try{
 
-// Generate Password
-function generatePassword(){
-    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let password = "";
-    for(let i=0;i<10;i++){
-        password += chars.charAt(Math.floor(Math.random()*chars.length));
-    }
+        const response = await fetch(
+            "https://expense-backend-a2t0.onrender.com/api/auth/create-user",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({ name, email, role })
+            }
+        );
 
-    alert("Generated Password:\n" + password);
-}
+        const data = await response.json();
 
-// Save All Users to LocalStorage
-function saveAllUsers(){
-
-    const rows = document.querySelectorAll("#userTable tr");
-    let users = [];
-
-    rows.forEach(row => {
-        const name = row.cells[0].querySelector("input").value;
-        const role = row.cells[1].querySelector("select").value;
-        const manager = row.cells[2].querySelector("input").value;
-        const gmail = row.cells[3].querySelector("input").value;
-
-        if(name && role){
-            users.push({name, role, manager, gmail});
+        if(!response.ok){
+            alert(data.message);
+            return;
         }
-    });
 
-    localStorage.setItem("users", JSON.stringify(users));
+        alert("User created successfully! Password sent to email.");
+
+        document.getElementById("name").value="";
+        document.getElementById("email").value="";
+
+    } catch(error){
+        alert("Server error");
+        console.error(error);
+    }
 }
 
-// Redirect to Rules Page
-function goToRules(){
-    saveAllUsers();
-    window.location.href = "rules.html";
+/* 🚪 Logout */
+function logout(){
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href="index.html";
 }
 
 </script>
 
 </body>
 </html>
-
-
-
-
