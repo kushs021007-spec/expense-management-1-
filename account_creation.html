@@ -101,6 +101,9 @@ button:hover{
 <button onclick="openCFOApproval()">CFO Approvals</button>
 
 <script>
+    if(localStorage.getItem("loggedInRole") !== "cfo"){
+    window.location.href = "index.html";
+}
 function openCFOApproval(){
     window.location.href = "cfo_approval.html";
 }
@@ -221,5 +224,6 @@ function goToRules(){
 
 </body>
 </html>
+
 
 
