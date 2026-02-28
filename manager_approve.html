@@ -5,25 +5,62 @@
 <title>Manager Approve List</title>
 
 <style>
-body{font-family:Arial;background:#eef2f7;padding:40px;}
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    padding:40px;
+}
+
 .container{
-max-width:800px;margin:auto;background:white;
-padding:25px;border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
-table{width:100%;border-collapse:collapse;}
-th,td{
-border:1px solid #ddd;
-padding:8px;text-align:center;
+
+h2{
+    text-align:center;
+    color:#2c3e50;
 }
-th{background:#4a90e2;color:white;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#4a90e2;
+    color:white;
+}
+
 button{
-padding:6px 12px;margin:3px;
-border:none;border-radius:4px;
-background:#4a90e2;color:white;
+    padding:6px 12px;
+    margin:4px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
 }
-.approve{background:green;}
-.reject{background:red;}
+
+.approve{ background:green; }
+.reject{ background:red; }
+.back-btn{
+    background:#4a90e2;
+}
+
+.bottom{
+    margin-top:20px;
+    text-align:center;
+}
 </style>
 </head>
 
@@ -36,68 +73,124 @@ background:#4a90e2;color:white;
 <table>
 <thead>
 <tr>
-<th>Employee</th>
-<th>Amount</th>
-<th>Action</th>
+    <th>Employee</th>
+    <th>Amount</th>
+    <th>Action</th>
 </tr>
 </thead>
 <tbody id="billTable"></tbody>
 </table>
 
-<button onclick="goBack()">⬅ Back</button>
+<div class="bottom">
+    <button class="back-btn" onclick="goBack()">
+        ⬅ Back to Dashboard
+    </button>
+</div>
 
 </div>
 
 <script>
 
+// Load bills submitted by employees
 let bills =
 JSON.parse(localStorage.getItem("bills")) || [];
 
+// Load CFO rules
+let rules =
+JSON.parse(localStorage.getItem("rulesData")) || {};
+
+
+// Load manager pending bills
 function load(){
 
-const table=
-document.getElementById("billTable");
-table.innerHTML="";
+    const table =
+    document.getElementById("billTable");
+    table.innerHTML="";
 
-bills
-.filter(b=>b.status==="manager_pending")
-.forEach((bill,index)=>{
+    bills
+    .filter(b => b.status === "manager_pending")
+    .forEach((bill,index)=>{
 
-let row=table.insertRow();
+        let row = table.insertRow();
 
-row.insertCell(0).innerText=bill.user;
-row.insertCell(1).innerText=bill.amount;
+        row.insertCell(0).innerText = bill.user;
+        row.insertCell(1).innerText = bill.amount;
 
-row.insertCell(2).innerHTML=
-`<button class="approve"
-onclick="approve(${index})">Approve</button>
-<button class="reject"
-onclick="reject(${index})">Reject</button>`;
-});
+        row.insertCell(2).innerHTML = `
+            <button class="approve"
+                onclick="approve(${index})">
+                Approve
+            </button>
+
+            <button class="reject"
+                onclick="reject(${index})">
+                Reject
+            </button>
+        `;
+    });
 }
 
+
+// 🔥 Manager Approval Logic
 function approve(i){
-bills[i].status="manager_approved";
-save();
+
+    let bill = bills[i];
+    let userRules = rules[bill.user];
+
+    if(!userRules){
+        // No rule found → direct approve
+        bills[i].status = "approved";
+    }
+    else{
+
+        let managerLimit =
+        Number(userRules.limit);
+
+        let amount =
+        Number(bill.amount);
+
+        if(amount <= managerLimit){
+            // Within limit → final approved
+            bills[i].status = "approved";
+        }
+        else{
+            // Exceeds limit → send to CFO
+            bills[i].status = "manager_approved";
+        }
+    }
+
+    save();
 }
 
+
+// Reject bill
 function reject(i){
-bills[i].status="rejected";
-save();
+    bills[i].status = "rejected";
+    save();
 }
 
+
+// Save changes
 function save(){
-localStorage.setItem("bills",
-JSON.stringify(bills));
-load();
+    localStorage.setItem(
+        "bills",
+        JSON.stringify(bills)
+    );
+    load();
 }
 
+
+// Back to Manager Dashboard
 function goBack(){
-window.location.href="manager_dashboard.html";
+    window.location.href =
+    "manager_dashboard.html";
 }
 
+
+// Initial Load
 load();
 
 </script>
+
 </body>
 </html>
