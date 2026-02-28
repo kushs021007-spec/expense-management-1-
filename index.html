@@ -85,36 +85,49 @@ button:hover {
 <script>
 function login(){
 
-    const gmail = document.getElementById("gmail").value;
-    const password = document.getElementById("password").value;
+    const gmail = document.getElementById("gmail").value.trim();
+    const password = document.getElementById("password").value.trim();
 
     if(gmail === "" || password === ""){
         alert("Please enter Gmail and Password");
         return;
     }
 
-    // Example role logic (you can improve later)
-    let role = "";
+    // Load all users created by CFO
+    const users =
+    JSON.parse(localStorage.getItem("users")) || [];
 
-    if(gmail.includes("cfo")){
-        role = "cfo";
-        localStorage.setItem("loggedInRole", role);
+    // Load CFO account
+    const cfo =
+    JSON.parse(localStorage.getItem("cfoAccount"));
+
+    // 🔹 Check CFO Login
+    if(cfo && gmail === cfo.gmail && password === cfo.password){
+        localStorage.setItem("loggedInRole","cfo");
         window.location.href = "account_creation.html";
+        return;
     }
-    else if(gmail.includes("manager")){
-        role = "manager";
-        localStorage.setItem("loggedInRole", role);
-        window.location.href = "manager_dashboard.html";
+
+    // 🔹 Check Manager / Employee Login
+    const user = users.find(u => u.gmail === gmail);
+
+    if(user){
+        if(user.role === "manager"){
+            localStorage.setItem("loggedInRole","manager");
+            window.location.href = "manager_dashboard.html";
+        }
+        else{
+            localStorage.setItem("loggedInRole","employee");
+            window.location.href = "employee_dashboard.html";
+        }
     }
     else{
-        role = "employee";
-        localStorage.setItem("loggedInRole", role);
-        window.location.href = "employee_dashboard.html";
+        alert("Invalid Login Details");
     }
 }
 </script>
-
 </body>
 </html>
+
 
 
