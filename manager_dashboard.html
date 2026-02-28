@@ -10,6 +10,9 @@ body{font-family:Arial;background:#eef2f7;padding:30px;}
 max-width:1000px;margin:auto;background:white;
 padding:25px;border-radius:10px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  <div style="text-align:right;">
+    <button onclick="logout()">Logout</button>
+</div>
 }
 button{
 padding:7px 12px;margin:3px;border:none;
@@ -74,6 +77,10 @@ localStorage.removeItem("managerEditIndex");
 window.location.href="manager_upload.html";
 }
 
+  function logout(){
+    localStorage.removeItem("loggedInRole");
+    window.location.href = "index.html";
+}
 function openApproveList(){
 window.location.href="manager_approve.html";
 }
@@ -131,4 +138,5 @@ load();
 
 </script>
 </body>
+
 </html>
