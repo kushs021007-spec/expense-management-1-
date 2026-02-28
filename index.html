@@ -85,21 +85,36 @@ button:hover {
 <script>
 function login(){
 
-    const gmail = document.getElementById("gmail").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const gmail = document.getElementById("gmail").value;
+    const password = document.getElementById("password").value;
 
     if(gmail === "" || password === ""){
-        alert("Please enter both Gmail and Password ❗");
+        alert("Please enter Gmail and Password");
         return;
     }
 
-    // Later you can add real authentication here
+    // Example role logic (you can improve later)
+    let role = "";
 
-    alert("Login Successful ✅");
-    window.location.href = "account_creation.html";
+    if(gmail.includes("cfo")){
+        role = "cfo";
+        localStorage.setItem("loggedInRole", role);
+        window.location.href = "account_creation.html";
+    }
+    else if(gmail.includes("manager")){
+        role = "manager";
+        localStorage.setItem("loggedInRole", role);
+        window.location.href = "manager_dashboard.html";
+    }
+    else{
+        role = "employee";
+        localStorage.setItem("loggedInRole", role);
+        window.location.href = "employee_dashboard.html";
+    }
 }
 </script>
 
 </body>
 </html>
+
 
