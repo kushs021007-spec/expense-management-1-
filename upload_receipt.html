@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Upload Receipt</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    padding:40px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+input{
+    width:100%;
+    padding:8px;
+    margin:10px 0;
+}
+
+button{
+    padding:8px 14px;
+    margin:5px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    background:#4a90e2;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Upload Receipt</h2>
+
+<input type="file" id="fileInput" onchange="scanReceipt()">
+
+<label>Date</label>
+<input type="date" id="date">
+
+<label>Description</label>
+<input type="text" id="description">
+
+<label>Paid By</label>
+<input type="text" id="paidBy">
+
+<label>Total Amount</label>
+<input type="number" id="amount">
+
+<div style="text-align:center;">
+    <button onclick="saveReceipt()">Save</button>
+    <button onclick="cancel()">Cancel</button>
+</div>
+
+</div>
+
+<script>
+
+let editIndex = localStorage.getItem("editIndex");
+
+// Simulated AI Scan
+function scanReceipt(){
+
+    const today = new Date().toISOString().split("T")[0];
+
+    document.getElementById("date").value = today;
+    document.getElementById("description").value = "Office Supplies";
+    document.getElementById("paidBy").value = "Self";
+    document.getElementById("amount").value = 1500;
+}
+
+
+// Load existing data if editing
+window.onload = function(){
+
+    if(editIndex !== null){
+
+        let receipts =
+        JSON.parse(localStorage.getItem("employeeReceipts")) || [];
+
+        let r = receipts[editIndex];
+
+        document.getElementById("date").value = r.date;
+        document.getElementById("description").value = r.desc;
+        document.getElementById("paidBy").value = r.paidBy;
+        document.getElementById("amount").value = r.amount;
+    }
+};
+
+
+function saveReceipt(){
+
+    let receipts =
+    JSON.parse(localStorage.getItem("employeeReceipts")) || [];
+
+    let data = {
+        date:document.getElementById("date").value,
+        desc:document.getElementById("description").value,
+        paidBy:document.getElementById("paidBy").value,
+        amount:document.getElementById("amount").value,
+        status:"draft"
+    };
+
+    if(editIndex !== null){
+        receipts[editIndex] = data;
+        localStorage.removeItem("editIndex");
+    } else {
+        receipts.push(data);
+    }
+
+    localStorage.setItem("employeeReceipts",
+        JSON.stringify(receipts));
+
+    window.location.href="employee_dashboard.html";
+}
+
+function cancel(){
+    localStorage.removeItem("editIndex");
+    window.location.href="employee_dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
